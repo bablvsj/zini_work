@@ -1,6 +1,6 @@
 // GET /api/tasks - 返回所有任务
 // POST /api/tasks - 新增任务
-const storage = require('../lib/storage');
+const storage = require('../../lib/storage');
 
 module.exports = async (req, res) => {
   // CORS
