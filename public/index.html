@@ -7,25 +7,48 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>工作追踪看板</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: { DEFAULT: '#3b82f6', hover: '#2563eb' },
+          success: { DEFAULT: '#22c55e', hover: '#16a34a' },
+          danger: { DEFAULT: '#ef4444', hover: '#dc2626' },
+          warning: { DEFAULT: '#f59e0b', hover: '#d97706' },
+          admin: { DEFAULT: '#a855f7', hover: '#9333ea' },
+          finance: { DEFAULT: '#3b82f6', hover: '#2563eb' },
+        },
+        boxShadow: {
+          'card': '0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08)',
+          'card-hover': '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05)',
+          'modal': '0 20px 50px -10px rgb(0 0 0 / 0.25)',
+        }
+      }
+    }
+  }
+</script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #f5f5f7;
+    --bg: #fafafa;
     --surface: #ffffff;
-    --text: #1d1d1f;
-    --text-secondary: #6e6e73;
-    --text-tertiary: #8e8e93;
-    --border: #e5e5ea;
-    --border-strong: #d2d2d7;
-    --primary: #3498db;
-    --primary-hover: #2980b9;
-    --success: #27ae60;
-    --success-hover: #219653;
-    --warning: #f39c12;
-    --danger: #e74c3c;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
-    --shadow-lg: 0 20px 60px rgba(0,0,0,0.18);
+    --text: #0a0a0a;
+    --text-secondary: #525252;
+    --text-tertiary: #a3a3a3;
+    --border: #e5e5e5;
+    --border-strong: #d4d4d4;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --success: #22c55e;
+    --success-hover: #16a34a;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --admin: #a855f7;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+    --shadow-lg: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
     --radius: 12px;
     --radius-sm: 8px;
   }
@@ -91,7 +114,7 @@
   .task:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
   .task.urgent { border-left-color: var(--danger); }
   .task.warn { border-left-color: var(--warning); }
-  .task.normal.admin { border-left-color: #9b59b6; }
+  .task.normal.admin { border-left-color: var(--admin); }
   .task.normal.finance { border-left-color: var(--primary); }
   .task.done { opacity: 0.55; border-left-color: var(--success); }
   .task.just-completed { animation: pulse-success 0.6s ease; }
@@ -113,7 +136,7 @@
     font-size: 11px; padding: 3px 9px; border-radius: 10px;
     font-weight: 500; letter-spacing: 0.2px;
   }
-  .tag.admin { background: #f3e8f9; color: #9b59b6; }
+  .tag.admin { background: #f3e8f9; color: var(--admin); }
   .tag.finance { background: #e3f0fb; color: var(--primary); }
   .tag.cycle { background: #f0f0f5; color: var(--text-secondary); }
   .tag.status-pending { background: #fdecea; color: var(--danger); }
