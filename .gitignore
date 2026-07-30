@@ -1,0 +1,18 @@
+# 依赖
+node_modules/
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 本地数据（含个人信息，不上传）
+tasks.js
+
+# 系统
+.DS_Store
+Thumbs.db
+*.log
+
+# Vercel
+.vercel/

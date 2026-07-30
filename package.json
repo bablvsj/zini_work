@@ -1,0 +1,16 @@
+{
+  "name": "work-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "工作追踪系统 - 替代 Excel 的智能任务提醒看板",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

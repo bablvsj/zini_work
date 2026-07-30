@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>工作追踪看板</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    background: linear-gradient(180deg, #f5f5f7 0%, #ececf0 100%);
+    color: #1d1d1f;
+    min-height: 100vh;
+    padding: 32px 20px 60px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+    padding-bottom: 20px; margin-bottom: 24px;
+    border-bottom: 2px solid #d2d2d7;
+  }
+  .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .header .sub { font-size: 13px; color: #6e6e73; margin-top: 4px; }
+  .header .right { text-align: right; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .header .updated { font-size: 12px; color: #6e6e73; }
+  .header .scan-info { font-size: 11px; color: #8e8e93; margin-top: 4px; max-width: 320px; }
+
+  /* Stats */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat {
+    background: #ffffff; border-radius: 12px; padding: 16px 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    border: 1px solid #e5e5ea;
+  }
+  .stat .num { font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .stat .label { font-size: 12px; color: #6e6e73; margin-top: 4px; }
+  .stat.danger .num { color: #e74c3c; }
+  .stat.warn .num { color: #f39c12; }
+  .stat.info .num { color: #3498db; }
+  .stat.ok .num { color: #27ae60; }
+
+  /* Section */
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 15px; font-weight: 600; color: #1d1d1f;
+    margin-bottom: 12px; padding-left: 10px;
+    border-left: 3px solid #1d1d1f;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .count {
+    background: #e5e5ea; color: #1d1d1f; font-size: 11px;
+    padding: 2px 8px; border-radius: 10px; font-weight: 500;
+  }
+
+  /* Task card */
+  .task {
+    background: #ffffff; border-radius: 12px; padding: 18px 20px;
+    border: 1px solid #e5e5ea; margin-bottom: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    border-left: 5px solid #d2d2d7;
+    transition: box-shadow 0.15s;
+  }
+  .task:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .task.urgent { border-left-color: #e74c3c; }
+  .task.warn { border-left-color: #f39c12; }
+  .task.normal.admin { border-left-color: #9b59b6; }
+  .task.normal.finance { border-left-color: #3498db; }
+  .task.done { opacity: 0.55; border-left-color: #27ae60; }
+
+  .task-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
+  }
+  .task-name { font-size: 17px; font-weight: 600; color: #1d1d1f; }
+  .task-id { font-size: 11px; color: #8e8e93; font-weight: 400; margin-left: 6px; }
+
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px; padding: 3px 9px; border-radius: 10px;
+    font-weight: 500; letter-spacing: 0.2px;
+  }
+  .tag.admin { background: #f3e8f9; color: #9b59b6; }
+  .tag.finance { background: #e3f0fb; color: #3498db; }
+  .tag.cycle { background: #f0f0f5; color: #6e6e73; }
+  .tag.status-pending { background: #fdecea; color: #e74c3c; }
+  .tag.status-done { background: #e8f6ec; color: #27ae60; }
+  .tag.status-skipped { background: #fff4e0; color: #f39c12; }
+
+  .task-desc { font-size: 13px; color: #4a4a4f; margin: 6px 0 10px; }
+  .task-meta {
+    display: flex; flex-wrap: wrap; gap: 18px;
+    font-size: 12px; color: #6e6e73;
+  }
+  .task-meta b { color: #1d1d1f; font-weight: 600; }
+  .task-meta .label-key { color: #8e8e93; margin-right: 4px; }
+
+  .task-history {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed #e5e5ea;
+    font-size: 12px; color: #6e6e73;
+  }
+  .task-history .h-item {
+    display: inline-block; padding: 2px 8px; margin: 2px 4px 2px 0;
+    background: #f0f0f5; border-radius: 8px; font-size: 11px;
+  }
+  .task-history .h-item.done { background: #e8f6ec; color: #27ae60; }
+  .task-history .h-item.missed { background: #fdecea; color: #e74c3c; }
+
+  .task-actions {
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px dashed #e5e5ea;
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .btn-mini {
+    border: 1px solid #d2d2d7; background: #fff; color: #1d1d1f;
+    border-radius: 8px; padding: 6px 12px; font-size: 12px;
+    cursor: pointer; font-weight: 500; transition: all 0.15s;
+  }
+  .btn-mini:hover { background: #f0f0f5; }
+  .btn-mini.primary { background: #27ae60; color: #fff; border-color: #27ae60; }
+  .btn-mini.primary:hover { background: #219653; }
+  .btn-mini.warn { background: #fff4e0; color: #f39c12; border-color: #ffe082; }
+  .btn-mini.danger { background: #fff; color: #e74c3c; border-color: #f5b7b1; }
+  .btn-mini.danger:hover { background: #fdecea; }
+
+  /* Empty */
+  .empty {
+    background: #ffffff; border: 1px dashed #d2d2d7; border-radius: 12px;
+    padding: 24px; text-align: center; color: #8e8e93; font-size: 13px;
+  }
+
+  /* History list */
+  .hist-item {
+    background: #ffffff; border: 1px solid #e5e5ea; border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 8px;
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .hist-item .left b { color: #1d1d1f; }
+  .hist-item .left .id { font-size: 11px; color: #8e8e93; }
+  .hist-item .right { color: #27ae60; font-size: 12px; font-weight: 500; }
+
+  /* Help */
+  .help {
+    background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px;
+    padding: 16px 20px; font-size: 13px; color: #6a4e1c; line-height: 1.7;
+  }
+  .help b { color: #4a3500; }
+  .help code {
+    background: #fff; padding: 1px 6px; border-radius: 4px;
+    border: 1px solid #ffe082; font-family: Consolas, monospace; font-size: 12px;
+  }
+
+  /* Buttons */
+  .btn {
+    background: #1d1d1f; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 16px; font-size: 13px; cursor: pointer; font-weight: 500;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn.primary { background: #3498db; }
+  .btn.secondary { background: #fff; color: #1d1d1f; border: 1px solid #d2d2d7; }
+
+  /* Modal */
+  .modal-mask {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+  .modal-mask.show { display: flex; }
+  .modal {
+    background: #fff; border-radius: 16px; padding: 28px;
+    max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .modal h2 { font-size: 20px; margin-bottom: 20px; }
+  .modal .form-row { margin-bottom: 14px; }
+  .modal label { display: block; font-size: 12px; color: #6e6e73; margin-bottom: 6px; font-weight: 500; }
+  .modal label .req { color: #e74c3c; }
+  .modal input, .modal select, .modal textarea {
+    width: 100%; border: 1px solid #d2d2d7; border-radius: 8px;
+    padding: 10px 12px; font-size: 14px; font-family: inherit;
+    background: #fff; color: #1d1d1f;
+  }
+  .modal input:focus, .modal select:focus, .modal textarea:focus {
+    outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52,152,219,0.15);
+  }
+  .modal .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .modal .form-grid .full { grid-column: span 2; }
+  .modal .modal-actions {
+    display: flex; justify-content: flex-end; gap: 10px;
+    margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e5ea;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1d1d1f; color: #fff; padding: 12px 20px; border-radius: 8px;
+    font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 2000; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+  .toast.success { background: #27ae60; }
+  .toast.error { background: #e74c3c; }
+
+  .badge-offline {
+    background: #e74c3c; color: #fff; padding: 4px 10px;
+    border-radius: 10px; font-size: 11px; font-weight: 500;
+  }
+
+  @media (max-width: 700px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .header { flex-direction: column; align-items: flex-start; }
+    .header .right { text-align: left; }
+    .modal .form-grid { grid-template-columns: 1fr; }
+    .modal .form-grid .full { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>工作追踪看板</h1>
+      <div class="sub">替代 Excel 的智能任务追踪 · 双击 start.bat 启动后访问</div>
+    </div>
+    <div class="right">
+      <span id="connStatus"></span>
+      <button class="btn primary" onclick="openAddModal()">+ 新增任务</button>
+      <button class="btn secondary" onclick="manualScan()">立即扫描提醒</button>
+      <button class="btn secondary" onclick="loadTasks()">刷新</button>
+      <div>
+        <div class="updated" id="updatedAt">数据更新：—</div>
+        <div class="scan-info" id="scanInfo"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="section">
+    <div class="section-title">紧急区 · 今日到期 / 已过期未做 <span class="count" id="urgentCount">0</span></div>
+    <div id="urgentList"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">本月 / 本季度待办 <span class="count" id="upcomingCount">0</span></div>
+    <div id="upcomingList"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">全部任务 <span class="count" id="allCount">0</span></div>
+    <div id="allList"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">已完成历史 <span class="count" id="histCount">0</span></div>
+    <div id="histList"></div>
+  </div>
+
+  <div class="help">
+    <b>使用说明：</b><br>
+    1. <b>启动</b>：双击 <code>start.bat</code>，浏览器会自动打开本看板。<br>
+    2. <b>新增任务</b>：点右上角 <code>+ 新增任务</code>，填表保存。<br>
+    3. <b>标记完成</b>：任务卡片右下角 <code>✓ 完成</code> 按钮，自动推进到下一周期。<br>
+    4. <b>跳过 / 删除</b>：任务卡片右下角对应按钮。<br>
+    5. <b>没做就一直提醒</b>：pending 状态的任务每天 9:00 自动提醒，直到点完成。<br>
+    6. <b>历史可查</b>：本页底部「已完成历史」区，所有完成记录都在，不用再翻付款凭证。
+  </div>
+</div>
+
+<!-- 新增任务 Modal -->
+<div class="modal-mask" id="addModal">
+  <div class="modal">
+    <h2>新增任务</h2>
+    <div class="form-row">
+      <label>任务名称 <span class="req">*</span></label>
+      <input id="f_name" placeholder="如：主任通行费发票" />
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>类型</label>
+        <select id="f_category">
+          <option value="行政">行政</option>
+          <option value="财务">财务</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>相关方</label>
+        <input id="f_relatedParty" placeholder="如：主任 / 租赁公司" />
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>周期类型 <span class="req">*</span></label>
+        <select id="f_cycleType" onchange="onCycleTypeChange()">
+          <option value="monthly-10">每月 10 号</option>
+          <option value="monthly-15">每月 15 号</option>
+          <option value="monthly-20">每月 20 号</option>
+          <option value="monthly-25">每月 25 号</option>
+          <option value="monthly-last">每月最后一天</option>
+          <option value="quarter-start">每季度初（1/4/7/10 月）</option>
+          <option value="quarter-end">每季度末（3/6/9/12 月）</option>
+          <option value="year-start">每年初</option>
+          <option value="custom">自定义</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>起始月/季度</label>
+        <input id="f_startDate" placeholder="如 2026-01 或 2026-Q3" />
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>结束月/季度（可选）</label>
+        <input id="f_endDate" placeholder="如 2026-09 或留空=长期" />
+      </div>
+      <div class="form-row">
+        <label>当前周期</label>
+        <input id="f_currentPeriod" placeholder="留空=自动按今天计算" />
+      </div>
+    </div>
+    <div class="form-row">
+      <label>描述（可选）</label>
+      <textarea id="f_description" rows="2" placeholder="如：为主任的租车合同开具本季度发票"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeAddModal()">取消</button>
+      <button class="btn primary" onclick="submitTask()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 完成备注 Modal -->
+<div class="modal-mask" id="doneModal">
+  <div class="modal">
+    <h2>标记完成</h2>
+    <p style="font-size:14px;color:#4a4a4f;margin-bottom:14px" id="doneTaskName"></p>
+    <div class="form-row">
+      <label>备注（可选）</label>
+      <textarea id="f_doneNote" rows="2" placeholder="如：已开 / 已付款 / 等发票寄回"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeDoneModal()">取消</button>
+      <button class="btn primary" onclick="confirmDone()">确认完成</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';
+let allTasks = { tasks: [], updatedAt: '' };
+let pendingDoneId = null;
+const today = new Date();
+const yyyy = today.getFullYear();
+const mm = today.getMonth() + 1;
+const quarter = Math.floor((mm - 1) / 3) + 1;
+const currentMonth = `${yyyy}-${String(mm).padStart(2,'0')}`;
+const currentQuarter = `${yyyy}-Q${quarter}`;
+
+function isUrgent(t) {
+  if (t.status !== 'pending') return false;
+  const day = today.getDate();
+  if (t.reminderRule === 'monthly-10' && day >= 10) return true;
+  if (t.reminderRule === 'monthly-15' && day >= 15) return true;
+  if (t.reminderRule === 'monthly-20' && day >= 20) return true;
+  if (t.reminderRule === 'monthly-25' && day >= 25) return true;
+  if (t.reminderRule === 'monthly-last') return true;
+  if (t.reminderRule === 'quarter-start' && [1,4,7,10].includes(mm) && day >= 1) return true;
+  if (t.reminderRule === 'quarter-end' && [3,6,9,12].includes(mm) && day >= 21) return true;
+  // 已过期
+  if (t.reminderRule && t.reminderRule.startsWith('monthly') && t.currentPeriod < currentMonth) return true;
+  if (t.reminderRule && t.reminderRule.startsWith('quarter') && t.currentPeriod < currentQuarter) return true;
+  return false;
+}
+
+function isUpcoming(t) {
+  if (t.status !== 'pending') return false;
+  if (isUrgent(t)) return false;
+  if (t.reminderRule && t.reminderRule.startsWith('monthly')) return t.currentPeriod === currentMonth;
+  if (t.reminderRule && t.reminderRule.startsWith('quarter')) return t.currentPeriod === currentQuarter;
+  return true;
+}
+
+function catTag(cat) {
+  if (cat === '行政') return '<span class="tag admin">行政</span>';
+  if (cat === '财务') return '<span class="tag finance">财务</span>';
+  return '';
+}
+function statusTag(s) {
+  if (s === 'skipped') return '<span class="tag status-skipped">已跳过</span>';
+  if (s === 'done') return '<span class="tag status-done">已完成</span>';
+  return '<span class="tag status-pending">待办</span>';
+}
+function urgencyClass(t) {
+  if (t.status === 'skipped') return 'done';
+  if (t.status === 'done') return 'done';
+  if (isUrgent(t)) return 'urgent';
+  if (isUpcoming(t)) return 'warn';
+  return 'normal ' + (t.category === '财务' ? 'finance' : 'admin');
+}
+
+function renderTask(t) {
+  const histItems = (t.history || []).map(h => {
+    const cls = h.completedAt ? 'done' : 'missed';
+    const label = h.completedAt ? `${h.period} ✓ ${h.completedAt}` : `${h.period} 未完成`;
+    return `<span class="h-item ${cls}">${label}</span>`;
+  }).join('');
+  const endDateInfo = t.endDate || '长期';
+  const cls = urgencyClass(t);
+  const isPending = t.status === 'pending';
+
+  const actions = isPending ? `
+    <div class="task-actions">
+      <button class="btn-mini primary" onclick="openDoneModal('${t.id}')">✓ 完成</button>
+      <button class="btn-mini warn" onclick="skipTask('${t.id}')">跳过本期</button>
+      <button class="btn-mini danger" onclick="deleteTask('${t.id}')">删除</button>
+    </div>
+  ` : (t.status === 'skipped' ? `
+    <div class="task-actions">
+      <button class="btn-mini" onclick="resumeTask('${t.id}')">恢复待办</button>
+      <button class="btn-mini danger" onclick="deleteTask('${t.id}')">删除</button>
+    </div>
+  ` : '');
+
+  return `
+    <div class="task ${cls}">
+      <div class="task-head">
+        <div>
+          <span class="task-name">${escapeHtml(t.name)}</span>
+          <span class="task-id">${t.id}</span>
+        </div>
+        <div class="tags">
+          ${catTag(t.category)}
+          <span class="tag cycle">${escapeHtml(t.cycleDesc || '')}</span>
+          ${statusTag(t.status)}
+        </div>
+      </div>
+      ${t.description ? `<div class="task-desc">${escapeHtml(t.description)}</div>` : ''}
+      <div class="task-meta">
+        <span><span class="label-key">相关方:</span><b>${escapeHtml(t.relatedParty || '—')}</b></span>
+        <span><span class="label-key">当前周期:</span><b>${escapeHtml(t.currentPeriod || '—')}</b></span>
+        <span><span class="label-key">起止:</span><b>${escapeHtml(t.startDate || '—')} → ${escapeHtml(endDateInfo)}</b></span>
+        <span><span class="label-key">提醒:</span>${escapeHtml(t.reminderRuleDesc || '')}</span>
+      </div>
+      ${histItems ? `<div class="task-history"><b style="color:#1d1d1f">历史:</b> ${histItems}</div>` : ''}
+      ${actions}
+    </div>
+  `;
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render() {
+  const tasks = allTasks.tasks || [];
+  document.getElementById('updatedAt').textContent = '数据更新：' + (allTasks.updatedAt || '—');
+
+  const urgent = tasks.filter(isUrgent);
+  const upcoming = tasks.filter(isUpcoming);
+  const allPending = tasks.filter(t => t.status === 'pending');
+  const doneCount = tasks.reduce((sum, t) => sum + (t.history || []).filter(h => h.completedAt).length, 0);
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat danger"><div class="num">${urgent.length}</div><div class="label">已过期 / 今日到期未做</div></div>
+    <div class="stat warn"><div class="num">${upcoming.length}</div><div class="label">本月/本季度待办</div></div>
+    <div class="stat info"><div class="num">${allPending.length}</div><div class="label">全部待办</div></div>
+    <div class="stat ok"><div class="num">${doneCount}</div><div class="label">累计已完成</div></div>
+  `;
+
+  document.getElementById('urgentCount').textContent = urgent.length;
+  document.getElementById('urgentList').innerHTML = urgent.length ? urgent.map(renderTask).join('') : '<div class="empty">暂无紧急任务，今天可以松口气 🍵</div>';
+
+  document.getElementById('upcomingCount').textContent = upcoming.length;
+  document.getElementById('upcomingList').innerHTML = upcoming.length ? upcoming.map(renderTask).join('') : '<div class="empty">本月/本季度暂无其他待办</div>';
+
+  document.getElementById('allCount').textContent = tasks.length;
+  document.getElementById('allList').innerHTML = tasks.length ? tasks.map(renderTask).join('') : '<div class="empty">还没有任务，点右上角 "+ 新增任务" 加一条吧</div>';
+
+  const allHist = [];
+  tasks.forEach(t => (t.history || []).forEach(h => {
+    if (h.completedAt) allHist.push({ taskId: t.id, taskName: t.name, period: h.period, completedAt: h.completedAt, note: h.note });
+  }));
+  allHist.sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''));
+  document.getElementById('histCount').textContent = allHist.length;
+  document.getElementById('histList').innerHTML = allHist.length ? allHist.slice(0, 30).map(h => `
+    <div class="hist-item">
+      <div class="left">
+        <b>${escapeHtml(h.taskName)}</b> <span class="id">${h.taskId}</span>
+        <div style="font-size:11px;color:#8e8e93;margin-top:2px">${escapeHtml(h.period)} ${h.note ? '· ' + escapeHtml(h.note) : ''}</div>
+      </div>
+      <div class="right">完成于 ${escapeHtml(h.completedAt)}</div>
+    </div>
+  `).join('') : '<div class="empty">还没有完成记录，做完第一条就有啦</div>';
+}
+
+async function loadTasks() {
+  try {
+    const r = await fetch(API + '/api/tasks');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    allTasks = await r.json();
+    document.getElementById('connStatus').innerHTML = '';
+    render();
+  } catch (e) {
+    document.getElementById('connStatus').innerHTML = '<span class="badge-offline">离线 · 双击 start.bat 启动</span>';
+    // 离线 fallback：尝试加载 tasks.js
+    if (window.TASKS) {
+      allTasks = window.TASKS;
+      render();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'tasks.js';
+      script.onload = () => { if (window.TASKS) { allTasks = window.TASKS; render(); } };
+      document.body.appendChild(script);
+    }
+  }
+}
+
+async function apiCall(url, opts) {
+  const r = await fetch(API + url, opts);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return await r.json();
+}
+
+function openAddModal() {
+  ['f_name','f_relatedParty','f_startDate','f_endDate','f_currentPeriod','f_description'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f_cycleType').value = 'monthly-10';
+  document.getElementById('f_startDate').value = currentMonth;
+  onCycleTypeChange();
+  document.getElementById('addModal').classList.add('show');
+  setTimeout(() => document.getElementById('f_name').focus(), 50);
+}
+function closeAddModal() { document.getElementById('addModal').classList.remove('show'); }
+
+function onCycleTypeChange() {
+  const v = document.getElementById('f_cycleType').value;
+  // 提示当前周期格式
+  let placeholder = '';
+  if (v.startsWith('monthly')) placeholder = '如 ' + currentMonth;
+  else if (v.startsWith('quarter')) placeholder = '如 ' + currentQuarter;
+  else if (v === 'year-start') placeholder = '如 ' + yyyy;
+  else placeholder = '如 2026-07 或 2026-Q3';
+  document.getElementById('f_startDate').placeholder = placeholder;
+  document.getElementById('f_currentPeriod').placeholder = '留空=自动按今天算 (' + (v.startsWith('quarter') ? currentQuarter : v === 'year-start' ? yyyy : currentMonth) + ')';
+}
+
+async function submitTask() {
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) return toast('请填写任务名', 'error');
+  const cycleType = document.getElementById('f_cycleType').value;
+  const cycleDescMap = {
+    'monthly-10':'每月 10 号','monthly-15':'每月 15 号','monthly-20':'每月 20 号',
+    'monthly-25':'每月 25 号','monthly-last':'每月最后一天',
+    'quarter-start':'每季度初','quarter-end':'每季度末','year-start':'每年初','custom':'自定义'
+  };
+  const payload = {
+    name,
+    category: document.getElementById('f_category').value,
+    relatedParty: document.getElementById('f_relatedParty').value.trim(),
+    reminderRule: cycleType,
+    reminderRuleDesc: cycleDescMap[cycleType] || cycleType,
+    cycle: cycleType.split('-')[0],
+    cycleDesc: cycleDescMap[cycleType] || cycleType,
+    startDate: document.getElementById('f_startDate').value.trim() || currentMonth,
+    endDate: document.getElementById('f_endDate').value.trim(),
+    currentPeriod: document.getElementById('f_currentPeriod').value.trim(),
+    description: document.getElementById('f_description').value.trim()
+  };
+  try {
+    await apiCall('/api/tasks', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    closeAddModal();
+    toast('任务已添加', 'success');
+    await loadTasks();
+  } catch (e) {
+    toast('保存失败：' + e.message, 'error');
+  }
+}
+
+function openDoneModal(id) {
+  pendingDoneId = id;
+  document.getElementById('f_doneNote').value = '';
+  const t = allTasks.tasks.find(x => x.id === id);
+  document.getElementById('doneTaskName').textContent = '任务：' + (t ? t.name : id) + '（周期：' + (t ? t.currentPeriod : '') + '）';
+  document.getElementById('doneModal').classList.add('show');
+  setTimeout(() => document.getElementById('f_doneNote').focus(), 50);
+}
+function closeDoneModal() { document.getElementById('doneModal').classList.remove('show'); pendingDoneId = null; }
+
+async function confirmDone() {
+  if (!pendingDoneId) return;
+  const note = document.getElementById('f_doneNote').value.trim();
+  try {
+    await apiCall('/api/tasks/' + pendingDoneId + '?action=complete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ note }) });
+    closeDoneModal();
+    toast('已标记完成，自动推进到下一周期', 'success');
+    await loadTasks();
+  } catch (e) {
+    toast('操作失败：' + e.message, 'error');
+  }
+}
+
+async function skipTask(id) {
+  if (!confirm('确认跳过本周期？（不影响下一周期提醒）')) return;
+  try {
+    await apiCall('/api/tasks/' + id + '?action=skip', { method: 'POST' });
+    toast('已跳过', 'success');
+    await loadTasks();
+  } catch (e) { toast('操作失败：' + e.message, 'error'); }
+}
+
+async function resumeTask(id) {
+  try {
+    await apiCall('/api/tasks/' + id + '?action=resume', { method: 'POST' });
+    toast('已恢复待办', 'success');
+    await loadTasks();
+  } catch (e) { toast('操作失败：' + e.message, 'error'); }
+}
+
+async function deleteTask(id) {
+  if (!confirm('确认删除此任务？历史记录也会一起删除，无法恢复。')) return;
+  try {
+    await apiCall('/api/tasks/' + id + '?action=delete', { method: 'POST' });
+    toast('已删除', 'success');
+    await loadTasks();
+  } catch (e) { toast('操作失败：' + e.message, 'error'); }
+}
+
+async function manualScan() {
+  try {
+    const r = await apiCall('/api/scan');
+    if (r.urgent.length === 0) {
+      toast('扫描完成，今日无到期或过期任务', 'success');
+    } else {
+      const names = r.urgent.map(t => `${t.id} ${t.name}`).join('\n');
+      toast('今日到期/过期未做 ' + r.urgent.length + ' 条', 'success');
+      setTimeout(() => alert('今日到期/过期未做 ' + r.urgent.length + ' 条：\n\n' + names + '\n\n（这些会在 WorkBuddy 对话每日 9:00 自动提醒）'), 100);
+    }
+  } catch (e) { toast('扫描失败：' + e.message, 'error'); }
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.className = 'toast show ' + type;
+  el.textContent = msg;
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// 键盘 ESC 关闭 modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('addModal').classList.remove('show');
+    document.getElementById('doneModal').classList.remove('show');
+  }
+});
+
+loadTasks();
+</script>
+</body>
+</html>
