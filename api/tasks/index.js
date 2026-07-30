@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
       const newId = 'T' + String(Math.max(0, ...ids) + 1).padStart(3, '0');
 
       const cycleDescMap = {
-        'monthly-10':'每月 10 号','monthly-15':'每月 15 号','monthly-20':'每月 20 号',
+        'monthly-5':'每月 5 号','monthly-10':'每月 10 号','monthly-15':'每月 15 号','monthly-20':'每月 20 号',
         'monthly-25':'每月 25 号','monthly-last':'每月最后一天',
         'quarter-start':'每季度初','quarter-end':'每季度末',
         'year-start':'每年初','custom':'自定义'

@@ -439,6 +439,7 @@
       <div class="form-row">
         <label>周期类型 <span class="req">*</span></label>
         <select id="f_cycleType" onchange="onCycleTypeChange()">
+          <option value="monthly-5">每月 5 号</option>
           <option value="monthly-10">每月 10 号</option>
           <option value="monthly-15">每月 15 号</option>
           <option value="monthly-20">每月 20 号</option>
@@ -522,6 +523,7 @@ const currentQuarter = `${yyyy}-Q${quarter}`;
 function isUrgent(t) {
   if (t.status !== 'pending') return false;
   const day = today.getDate();
+  if (t.reminderRule === 'monthly-5' && day >= 5) return true;
   if (t.reminderRule === 'monthly-10' && day >= 10) return true;
   if (t.reminderRule === 'monthly-15' && day >= 15) return true;
   if (t.reminderRule === 'monthly-20' && day >= 20) return true;
@@ -778,7 +780,7 @@ async function submitTask(btn) {
 
   const cycleType = document.getElementById('f_cycleType').value;
   const cycleDescMap = {
-    'monthly-10':'每月 10 号','monthly-15':'每月 15 号','monthly-20':'每月 20 号',
+    'monthly-5':'每月 5 号','monthly-10':'每月 10 号','monthly-15':'每月 15 号','monthly-20':'每月 20 号',
     'monthly-25':'每月 25 号','monthly-last':'每月最后一天',
     'quarter-start':'每季度初','quarter-end':'每季度末','year-start':'每年初','custom':'自定义'
   };

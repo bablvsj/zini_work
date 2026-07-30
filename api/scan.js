@@ -31,6 +31,7 @@ function scanTasks(data) {
     let due = false, overdue = false;
 
     // 今日是否到提醒日
+    if (t.reminderRule === 'monthly-5' && day >= 5) due = true;
     if (t.reminderRule === 'monthly-10' && day >= 10) due = true;
     if (t.reminderRule === 'monthly-15' && day >= 15) due = true;
     if (t.reminderRule === 'monthly-20' && day >= 20) due = true;
