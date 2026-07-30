@@ -1,5 +1,5 @@
 // Cloudflare Pages Function: /api/tasks/[id] (POST 操作)
-import { readAll, upsertTask, deleteTask, advancePeriod, today, jsonResponse } from '../../../../lib/storage.mjs';
+import { readAll, upsertTask, deleteTask, advancePeriod, today, jsonResponse } from '../../../lib/storage.mjs';
 
 export async function onRequestPost(context) {
   const { env, request, params } = context;

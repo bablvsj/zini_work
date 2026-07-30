@@ -1,5 +1,5 @@
 // Cloudflare Pages Function: /api/scan
-import { readAll, scanTasks, jsonResponse } from '../../../lib/storage.mjs';
+import { readAll, scanTasks, jsonResponse } from '../../lib/storage.mjs';
 
 export async function onRequestGet(context) {
   const { env } = context;

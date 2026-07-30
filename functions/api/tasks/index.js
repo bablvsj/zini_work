@@ -1,5 +1,5 @@
 // Cloudflare Pages Function: /api/tasks (GET 全部 / POST 新增)
-import { readAll, upsertTask, today, computeCurrentPeriod, jsonResponse } from '../../../../lib/storage.mjs';
+import { readAll, upsertTask, today, computeCurrentPeriod, jsonResponse } from '../../../lib/storage.mjs';
 
 const cycleDescMap = {
   'monthly-10':'每月 10 号','monthly-15':'每月 15 号','monthly-20':'每月 20 号',
