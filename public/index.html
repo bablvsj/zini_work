@@ -5,10 +5,30 @@
 <title>工作追踪看板</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #8e8e93;
+    --border: #e5e5ea;
+    --border-strong: #d2d2d7;
+    --primary: #3498db;
+    --primary-hover: #2980b9;
+    --success: #27ae60;
+    --success-hover: #219653;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.18);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
   body {
     font-family: -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
     background: linear-gradient(180deg, #f5f5f7 0%, #ececf0 100%);
-    color: #1d1d1f;
+    color: var(--text);
     min-height: 100vh;
     padding: 32px 20px 60px;
     line-height: 1.5;
@@ -20,65 +40,69 @@
     display: flex; align-items: flex-end; justify-content: space-between;
     flex-wrap: wrap; gap: 12px;
     padding-bottom: 20px; margin-bottom: 24px;
-    border-bottom: 2px solid #d2d2d7;
+    border-bottom: 2px solid var(--border-strong);
   }
   .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
-  .header .sub { font-size: 13px; color: #6e6e73; margin-top: 4px; }
+  .header .sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
   .header .right { text-align: right; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .header .updated { font-size: 12px; color: #6e6e73; }
-  .header .scan-info { font-size: 11px; color: #8e8e93; margin-top: 4px; max-width: 320px; }
+  .header .updated { font-size: 12px; color: var(--text-secondary); }
+  .header .scan-info { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; max-width: 320px; }
 
   /* Stats */
-  .stats {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-    margin-bottom: 28px;
-  }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
   .stat {
-    background: #ffffff; border-radius: 12px; padding: 16px 18px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    border: 1px solid #e5e5ea;
+    background: var(--surface); border-radius: var(--radius); padding: 16px 18px;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+    transition: transform 0.15s, box-shadow 0.15s;
   }
+  .stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
   .stat .num { font-size: 28px; font-weight: 700; line-height: 1.1; }
-  .stat .label { font-size: 12px; color: #6e6e73; margin-top: 4px; }
-  .stat.danger .num { color: #e74c3c; }
-  .stat.warn .num { color: #f39c12; }
-  .stat.info .num { color: #3498db; }
-  .stat.ok .num { color: #27ae60; }
+  .stat .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .stat.danger .num { color: var(--danger); }
+  .stat.warn .num { color: var(--warning); }
+  .stat.info .num { color: var(--primary); }
+  .stat.ok .num { color: var(--success); }
 
   /* Section */
   .section { margin-bottom: 32px; }
   .section-title {
-    font-size: 15px; font-weight: 600; color: #1d1d1f;
+    font-size: 15px; font-weight: 600; color: var(--text);
     margin-bottom: 12px; padding-left: 10px;
-    border-left: 3px solid #1d1d1f;
+    border-left: 3px solid var(--text);
     display: flex; align-items: center; gap: 8px;
   }
   .section-title .count {
-    background: #e5e5ea; color: #1d1d1f; font-size: 11px;
+    background: #e5e5ea; color: var(--text); font-size: 11px;
     padding: 2px 8px; border-radius: 10px; font-weight: 500;
   }
 
   /* Task card */
   .task {
-    background: #ffffff; border-radius: 12px; padding: 18px 20px;
-    border: 1px solid #e5e5ea; margin-bottom: 12px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-    border-left: 5px solid #d2d2d7;
-    transition: box-shadow 0.15s;
+    background: var(--surface); border-radius: var(--radius); padding: 18px 20px;
+    border: 1px solid var(--border); margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+    border-left: 5px solid var(--border-strong);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
-  .task:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-  .task.urgent { border-left-color: #e74c3c; }
-  .task.warn { border-left-color: #f39c12; }
+  .task:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .task.urgent { border-left-color: var(--danger); }
+  .task.warn { border-left-color: var(--warning); }
   .task.normal.admin { border-left-color: #9b59b6; }
-  .task.normal.finance { border-left-color: #3498db; }
-  .task.done { opacity: 0.55; border-left-color: #27ae60; }
+  .task.normal.finance { border-left-color: var(--primary); }
+  .task.done { opacity: 0.55; border-left-color: var(--success); }
+  .task.just-completed { animation: pulse-success 0.6s ease; }
+  @keyframes pulse-success {
+    0% { box-shadow: 0 0 0 0 rgba(39,174,96,0.5); }
+    50% { box-shadow: 0 0 0 12px rgba(39,174,96,0); }
+    100% { box-shadow: 0 0 0 0 rgba(39,174,96,0); }
+  }
 
   .task-head {
     display: flex; justify-content: space-between; align-items: flex-start;
     flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
   }
-  .task-name { font-size: 17px; font-weight: 600; color: #1d1d1f; }
-  .task-id { font-size: 11px; color: #8e8e93; font-weight: 400; margin-left: 6px; }
+  .task-name { font-size: 17px; font-weight: 600; color: var(--text); }
+  .task-id { font-size: 11px; color: var(--text-tertiary); font-weight: 400; margin-left: 6px; }
 
   .tags { display: flex; gap: 6px; flex-wrap: wrap; }
   .tag {
@@ -86,68 +110,106 @@
     font-weight: 500; letter-spacing: 0.2px;
   }
   .tag.admin { background: #f3e8f9; color: #9b59b6; }
-  .tag.finance { background: #e3f0fb; color: #3498db; }
-  .tag.cycle { background: #f0f0f5; color: #6e6e73; }
-  .tag.status-pending { background: #fdecea; color: #e74c3c; }
-  .tag.status-done { background: #e8f6ec; color: #27ae60; }
-  .tag.status-skipped { background: #fff4e0; color: #f39c12; }
+  .tag.finance { background: #e3f0fb; color: var(--primary); }
+  .tag.cycle { background: #f0f0f5; color: var(--text-secondary); }
+  .tag.status-pending { background: #fdecea; color: var(--danger); }
+  .tag.status-done { background: #e8f6ec; color: var(--success); }
+  .tag.status-skipped { background: #fff4e0; color: var(--warning); }
 
   .task-desc { font-size: 13px; color: #4a4a4f; margin: 6px 0 10px; }
-  .task-meta {
-    display: flex; flex-wrap: wrap; gap: 18px;
-    font-size: 12px; color: #6e6e73;
-  }
-  .task-meta b { color: #1d1d1f; font-weight: 600; }
-  .task-meta .label-key { color: #8e8e93; margin-right: 4px; }
+  .task-meta { display: flex; flex-wrap: wrap; gap: 18px; font-size: 12px; color: var(--text-secondary); }
+  .task-meta b { color: var(--text); font-weight: 600; }
+  .task-meta .label-key { color: var(--text-tertiary); margin-right: 4px; }
 
   .task-history {
     margin-top: 10px; padding-top: 10px;
-    border-top: 1px dashed #e5e5ea;
-    font-size: 12px; color: #6e6e73;
+    border-top: 1px dashed var(--border);
+    font-size: 12px; color: var(--text-secondary);
   }
   .task-history .h-item {
     display: inline-block; padding: 2px 8px; margin: 2px 4px 2px 0;
     background: #f0f0f5; border-radius: 8px; font-size: 11px;
   }
-  .task-history .h-item.done { background: #e8f6ec; color: #27ae60; }
-  .task-history .h-item.missed { background: #fdecea; color: #e74c3c; }
+  .task-history .h-item.done { background: #e8f6ec; color: var(--success); }
+  .task-history .h-item.missed { background: #fdecea; color: var(--danger); }
 
   .task-actions {
     margin-top: 12px; padding-top: 12px;
-    border-top: 1px dashed #e5e5ea;
+    border-top: 1px dashed var(--border);
     display: flex; gap: 8px; flex-wrap: wrap;
   }
-  .btn-mini {
-    border: 1px solid #d2d2d7; background: #fff; color: #1d1d1f;
-    border-radius: 8px; padding: 6px 12px; font-size: 12px;
-    cursor: pointer; font-weight: 500; transition: all 0.15s;
+
+  /* Buttons */
+  .btn, .btn-mini {
+    border: 1px solid var(--border-strong); background: var(--surface); color: var(--text);
+    border-radius: var(--radius-sm); font-size: 13px;
+    cursor: pointer; font-weight: 500;
+    transition: background 0.15s, transform 0.08s, box-shadow 0.15s, opacity 0.15s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    user-select: none;
   }
-  .btn-mini:hover { background: #f0f0f5; }
-  .btn-mini.primary { background: #27ae60; color: #fff; border-color: #27ae60; }
-  .btn-mini.primary:hover { background: #219653; }
-  .btn-mini.warn { background: #fff4e0; color: #f39c12; border-color: #ffe082; }
-  .btn-mini.danger { background: #fff; color: #e74c3c; border-color: #f5b7b1; }
+  .btn { padding: 8px 16px; }
+  .btn-mini { padding: 6px 12px; font-size: 12px; }
+
+  .btn:hover, .btn-mini:hover { background: #f0f0f5; }
+  .btn:active, .btn-mini:active { transform: scale(0.96); }
+  .btn:disabled, .btn-mini:disabled,
+  .btn.loading, .btn-mini.loading {
+    opacity: 0.6; cursor: not-allowed; transform: none !important;
+  }
+  .btn.loading::before, .btn-mini.loading::before {
+    content: ''; width: 12px; height: 12px;
+    border: 2px solid currentColor; border-top-color: transparent;
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+    margin-right: 2px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn.primary:hover { background: var(--primary-hover); }
+  .btn.secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); }
+
+  .btn-mini.primary { background: var(--success); color: #fff; border-color: var(--success); }
+  .btn-mini.primary:hover { background: var(--success-hover); }
+  .btn-mini.warn { background: #fff4e0; color: var(--warning); border-color: #ffe082; }
+  .btn-mini.warn:hover { background: #ffe9b3; }
+  .btn-mini.danger { background: var(--surface); color: var(--danger); border-color: #f5b7b1; }
   .btn-mini.danger:hover { background: #fdecea; }
 
   /* Empty */
   .empty {
-    background: #ffffff; border: 1px dashed #d2d2d7; border-radius: 12px;
-    padding: 24px; text-align: center; color: #8e8e93; font-size: 13px;
+    background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius);
+    padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 13px;
   }
+
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, #eee 25%, #f5f5f7 50%, #eee 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.4s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+  }
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .skeleton-card { height: 120px; margin-bottom: 12px; border-radius: var(--radius); }
 
   /* History list */
   .hist-item {
-    background: #ffffff; border: 1px solid #e5e5ea; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     padding: 12px 16px; margin-bottom: 8px;
     display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    transition: transform 0.15s, box-shadow 0.15s;
   }
-  .hist-item .left b { color: #1d1d1f; }
-  .hist-item .left .id { font-size: 11px; color: #8e8e93; }
-  .hist-item .right { color: #27ae60; font-size: 12px; font-weight: 500; }
+  .hist-item:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .hist-item .left b { color: var(--text); }
+  .hist-item .left .id { font-size: 11px; color: var(--text-tertiary); }
+  .hist-item .right { color: var(--success); font-size: 12px; font-weight: 500; }
 
   /* Help */
   .help {
-    background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px;
+    background: #fff8e1; border: 1px solid #ffe082; border-radius: var(--radius);
     padding: 16px 20px; font-size: 13px; color: #6a4e1c; line-height: 1.7;
   }
   .help b { color: #4a3500; }
@@ -156,61 +218,80 @@
     border: 1px solid #ffe082; font-family: Consolas, monospace; font-size: 12px;
   }
 
-  /* Buttons */
-  .btn {
-    background: #1d1d1f; color: #fff; border: none; border-radius: 8px;
-    padding: 8px 16px; font-size: 13px; cursor: pointer; font-weight: 500;
-    transition: opacity 0.15s;
-  }
-  .btn:hover { opacity: 0.85; }
-  .btn.primary { background: #3498db; }
-  .btn.secondary { background: #fff; color: #1d1d1f; border: 1px solid #d2d2d7; }
-
   /* Modal */
   .modal-mask {
     position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    display: none; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     z-index: 1000; padding: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
   }
-  .modal-mask.show { display: flex; }
+  .modal-mask.show { opacity: 1; pointer-events: auto; }
   .modal {
-    background: #fff; border-radius: 16px; padding: 28px;
+    background: var(--surface); border-radius: 16px; padding: 28px;
     max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    box-shadow: var(--shadow-lg);
+    transform: scale(0.92) translateY(8px);
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+  .modal-mask.show .modal { transform: scale(1) translateY(0); }
   .modal h2 { font-size: 20px; margin-bottom: 20px; }
   .modal .form-row { margin-bottom: 14px; }
-  .modal label { display: block; font-size: 12px; color: #6e6e73; margin-bottom: 6px; font-weight: 500; }
-  .modal label .req { color: #e74c3c; }
+  .modal label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 500; }
+  .modal label .req { color: var(--danger); }
   .modal input, .modal select, .modal textarea {
-    width: 100%; border: 1px solid #d2d2d7; border-radius: 8px;
+    width: 100%; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
     padding: 10px 12px; font-size: 14px; font-family: inherit;
-    background: #fff; color: #1d1d1f;
+    background: var(--surface); color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
   .modal input:focus, .modal select:focus, .modal textarea:focus {
-    outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52,152,219,0.15);
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(52,152,219,0.18);
+  }
+  .modal input.error, .modal select.error, .modal textarea.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
   }
   .modal .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .modal .form-grid .full { grid-column: span 2; }
   .modal .modal-actions {
     display: flex; justify-content: flex-end; gap: 10px;
-    margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e5ea;
+    margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);
+  }
+
+  /* Confirm dialog */
+  .confirm-modal { max-width: 420px; padding: 24px; }
+  .confirm-modal .confirm-message { font-size: 14px; color: var(--text); margin-bottom: 20px; line-height: 1.6; }
+  .confirm-modal .confirm-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #fdecea; color: var(--danger);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 12px; font-weight: 700;
   }
 
   /* Toast */
   .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: #1d1d1f; color: #fff; padding: 12px 20px; border-radius: 8px;
-    font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 2000; opacity: 0; transition: opacity 0.2s, transform 0.2s;
-    pointer-events: none;
+    position: fixed; top: 24px; right: 24px;
+    background: var(--text); color: #fff; padding: 12px 20px; border-radius: var(--radius-sm);
+    font-size: 13px; box-shadow: var(--shadow-md);
+    z-index: 2000;
+    transform: translateX(120%); opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+    pointer-events: none; max-width: 360px;
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
-  .toast.success { background: #27ae60; }
-  .toast.error { background: #e74c3c; }
+  .toast.show { transform: translateX(0); opacity: 1; }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
 
   .badge-offline {
-    background: #e74c3c; color: #fff; padding: 4px 10px;
+    background: var(--danger); color: #fff; padding: 4px 10px;
     border-radius: 10px; font-size: 11px; font-weight: 500;
   }
 
@@ -220,6 +301,7 @@
     .header .right { text-align: left; }
     .modal .form-grid { grid-template-columns: 1fr; }
     .modal .form-grid .full { grid-column: span 1; }
+    .toast { top: 12px; right: 12px; left: 12px; max-width: none; }
   }
 </style>
 </head>
@@ -228,13 +310,13 @@
   <div class="header">
     <div>
       <h1>工作追踪看板</h1>
-      <div class="sub">替代 Excel 的智能任务追踪 · 双击 start.bat 启动后访问</div>
+      <div class="sub">替代 Excel 的智能任务追踪 · 系统主动找你，不是你找系统</div>
     </div>
     <div class="right">
       <span id="connStatus"></span>
       <button class="btn primary" onclick="openAddModal()">+ 新增任务</button>
-      <button class="btn secondary" onclick="manualScan()">立即扫描提醒</button>
-      <button class="btn secondary" onclick="loadTasks()">刷新</button>
+      <button class="btn secondary" onclick="manualScan(this)">立即扫描提醒</button>
+      <button class="btn secondary" onclick="loadTasks(this)">刷新</button>
       <div>
         <div class="updated" id="updatedAt">数据更新：—</div>
         <div class="scan-info" id="scanInfo"></div>
@@ -266,17 +348,17 @@
 
   <div class="help">
     <b>使用说明：</b><br>
-    1. <b>启动</b>：双击 <code>start.bat</code>，浏览器会自动打开本看板。<br>
-    2. <b>新增任务</b>：点右上角 <code>+ 新增任务</code>，填表保存。<br>
-    3. <b>标记完成</b>：任务卡片右下角 <code>✓ 完成</code> 按钮，自动推进到下一周期。<br>
-    4. <b>跳过 / 删除</b>：任务卡片右下角对应按钮。<br>
-    5. <b>没做就一直提醒</b>：pending 状态的任务每天 9:00 自动提醒，直到点完成。<br>
-    6. <b>历史可查</b>：本页底部「已完成历史」区，所有完成记录都在，不用再翻付款凭证。
+    1. <b>新增任务</b>：点右上角 <code>+ 新增任务</code>，填表保存（必填：任务名）。<br>
+    2. <b>标记完成</b>：任务卡片右下角 <code>✓ 完成</code>，自动推进到下一周期。<br>
+    3. <b>跳过 / 删除</b>：任务卡片右下角对应按钮，会弹确认框防误操作。<br>
+    4. <b>没做就一直提醒</b>：pending 状态的任务每天 9:00 自动提醒，直到点完成。<br>
+    5. <b>历史可查</b>：本页底部「已完成历史」区，所有完成记录都在，不用再翻付款凭证。<br>
+    6. <b>快捷键</b>：弹框按 <code>ESC</code> 关闭，新增任务时按 <code>Enter</code> 保存。
   </div>
 </div>
 
 <!-- 新增任务 Modal -->
-<div class="modal-mask" id="addModal">
+<div class="modal-mask" id="addModal" onclick="if(event.target===this) closeAddModal()">
   <div class="modal">
     <h2>新增任务</h2>
     <div class="form-row">
@@ -332,13 +414,13 @@
     </div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeAddModal()">取消</button>
-      <button class="btn primary" onclick="submitTask()">保存</button>
+      <button class="btn primary" id="btnSubmitTask" onclick="submitTask(this)">保存</button>
     </div>
   </div>
 </div>
 
 <!-- 完成备注 Modal -->
-<div class="modal-mask" id="doneModal">
+<div class="modal-mask" id="doneModal" onclick="if(event.target===this) closeDoneModal()">
   <div class="modal">
     <h2>标记完成</h2>
     <p style="font-size:14px;color:#4a4a4f;margin-bottom:14px" id="doneTaskName"></p>
@@ -348,7 +430,19 @@
     </div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeDoneModal()">取消</button>
-      <button class="btn primary" onclick="confirmDone()">确认完成</button>
+      <button class="btn primary" id="btnConfirmDone" onclick="confirmDone(this)">确认完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- 自定义确认 Modal -->
+<div class="modal-mask" id="confirmModal" onclick="if(event.target===this) closeConfirmModal(false)">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon" id="confirmIcon">!</div>
+    <div class="confirm-message" id="confirmMessage">确认操作？</div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeConfirmModal(false)">取消</button>
+      <button class="btn primary" id="btnConfirmOk" onclick="closeConfirmModal(true)">确认</button>
     </div>
   </div>
 </div>
@@ -359,6 +453,8 @@
 const API = '';
 let allTasks = { tasks: [], updatedAt: '' };
 let pendingDoneId = null;
+let confirmResolve = null;
+let justCompletedId = null;
 const today = new Date();
 const yyyy = today.getFullYear();
 const mm = today.getMonth() + 1;
@@ -376,7 +472,6 @@ function isUrgent(t) {
   if (t.reminderRule === 'monthly-last') return true;
   if (t.reminderRule === 'quarter-start' && [1,4,7,10].includes(mm) && day >= 1) return true;
   if (t.reminderRule === 'quarter-end' && [3,6,9,12].includes(mm) && day >= 21) return true;
-  // 已过期
   if (t.reminderRule && t.reminderRule.startsWith('monthly') && t.currentPeriod < currentMonth) return true;
   if (t.reminderRule && t.reminderRule.startsWith('quarter') && t.currentPeriod < currentQuarter) return true;
   return false;
@@ -417,22 +512,23 @@ function renderTask(t) {
   const endDateInfo = t.endDate || '长期';
   const cls = urgencyClass(t);
   const isPending = t.status === 'pending';
+  const justCompletedCls = justCompletedId === t.id ? 'just-completed' : '';
 
   const actions = isPending ? `
     <div class="task-actions">
       <button class="btn-mini primary" onclick="openDoneModal('${t.id}')">✓ 完成</button>
-      <button class="btn-mini warn" onclick="skipTask('${t.id}')">跳过本期</button>
-      <button class="btn-mini danger" onclick="deleteTask('${t.id}')">删除</button>
+      <button class="btn-mini warn" onclick="skipTask('${t.id}', this)">跳过本期</button>
+      <button class="btn-mini danger" onclick="deleteTask('${t.id}', this)">删除</button>
     </div>
   ` : (t.status === 'skipped' ? `
     <div class="task-actions">
-      <button class="btn-mini" onclick="resumeTask('${t.id}')">恢复待办</button>
-      <button class="btn-mini danger" onclick="deleteTask('${t.id}')">删除</button>
+      <button class="btn-mini" onclick="resumeTask('${t.id}', this)">恢复待办</button>
+      <button class="btn-mini danger" onclick="deleteTask('${t.id}', this)">删除</button>
     </div>
   ` : '');
 
   return `
-    <div class="task ${cls}">
+    <div class="task ${cls} ${justCompletedCls}" data-task-id="${t.id}">
       <div class="task-head">
         <div>
           <span class="task-name">${escapeHtml(t.name)}</span>
@@ -451,7 +547,7 @@ function renderTask(t) {
         <span><span class="label-key">起止:</span><b>${escapeHtml(t.startDate || '—')} → ${escapeHtml(endDateInfo)}</b></span>
         <span><span class="label-key">提醒:</span>${escapeHtml(t.reminderRuleDesc || '')}</span>
       </div>
-      ${histItems ? `<div class="task-history"><b style="color:#1d1d1f">历史:</b> ${histItems}</div>` : ''}
+      ${histItems ? `<div class="task-history"><b style="color:var(--text)">历史:</b> ${histItems}</div>` : ''}
       ${actions}
     </div>
   `;
@@ -496,14 +592,27 @@ function render() {
     <div class="hist-item">
       <div class="left">
         <b>${escapeHtml(h.taskName)}</b> <span class="id">${h.taskId}</span>
-        <div style="font-size:11px;color:#8e8e93;margin-top:2px">${escapeHtml(h.period)} ${h.note ? '· ' + escapeHtml(h.note) : ''}</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">${escapeHtml(h.period)} ${h.note ? '· ' + escapeHtml(h.note) : ''}</div>
       </div>
       <div class="right">完成于 ${escapeHtml(h.completedAt)}</div>
     </div>
   `).join('') : '<div class="empty">还没有完成记录，做完第一条就有啦</div>';
+
+  // 完成动画后清除标记
+  if (justCompletedId) {
+    setTimeout(() => { justCompletedId = null; }, 700);
+  }
 }
 
-async function loadTasks() {
+function renderSkeleton() {
+  const skeleton = '<div class="skeleton skeleton-card"></div>'.repeat(3);
+  document.getElementById('urgentList').innerHTML = skeleton;
+  document.getElementById('allList').innerHTML = skeleton;
+}
+
+async function loadTasks(btn) {
+  if (btn) setLoading(btn, true);
+  renderSkeleton();
   try {
     const r = await fetch(API + '/api/tasks');
     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -512,7 +621,6 @@ async function loadTasks() {
     render();
   } catch (e) {
     document.getElementById('connStatus').innerHTML = '<span class="badge-offline">离线 · 双击 start.bat 启动</span>';
-    // 离线 fallback：尝试加载 tasks.js
     if (window.TASKS) {
       allTasks = window.TASKS;
       render();
@@ -522,6 +630,9 @@ async function loadTasks() {
       script.onload = () => { if (window.TASKS) { allTasks = window.TASKS; render(); } };
       document.body.appendChild(script);
     }
+    toast('加载失败：' + e.message, 'error');
+  } finally {
+    if (btn) setLoading(btn, false);
   }
 }
 
@@ -531,19 +642,63 @@ async function apiCall(url, opts) {
   return await r.json();
 }
 
+// 按钮 loading 包装
+function setLoading(btn, loading) {
+  if (!btn) return;
+  if (loading) {
+    btn.dataset.originalText = btn.textContent;
+    btn.classList.add('loading');
+    btn.disabled = true;
+    btn.textContent = btn.textContent; // 保留文字，spinner 通过 ::before 显示
+  } else {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    if (btn.dataset.originalText !== undefined) btn.textContent = btn.dataset.originalText;
+  }
+}
+
+async function withLoading(btn, fn) {
+  if (!btn || btn.disabled) return; // 防重复点击
+  setLoading(btn, true);
+  try { await fn(); }
+  finally { setLoading(btn, false); }
+}
+
+// 自定义 confirm 弹框（替代浏览器 confirm）
+function customConfirm(message, options = {}) {
+  return new Promise(resolve => {
+    confirmResolve = resolve;
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmModal').classList.add('show');
+    // 把 confirm 按钮焦点放过去
+    setTimeout(() => document.getElementById('btnConfirmOk').focus(), 50);
+  });
+}
+function closeConfirmModal(confirmed) {
+  document.getElementById('confirmModal').classList.remove('show');
+  if (confirmResolve) {
+    confirmResolve(confirmed);
+    confirmResolve = null;
+  }
+}
+
 function openAddModal() {
-  ['f_name','f_relatedParty','f_startDate','f_endDate','f_currentPeriod','f_description'].forEach(id => document.getElementById(id).value = '');
+  ['f_name','f_relatedParty','f_startDate','f_endDate','f_currentPeriod','f_description'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('error');
+  });
+  document.getElementById('f_category').value = '行政';
   document.getElementById('f_cycleType').value = 'monthly-10';
   document.getElementById('f_startDate').value = currentMonth;
   onCycleTypeChange();
   document.getElementById('addModal').classList.add('show');
-  setTimeout(() => document.getElementById('f_name').focus(), 50);
+  setTimeout(() => document.getElementById('f_name').focus(), 200);
 }
 function closeAddModal() { document.getElementById('addModal').classList.remove('show'); }
 
 function onCycleTypeChange() {
   const v = document.getElementById('f_cycleType').value;
-  // 提示当前周期格式
   let placeholder = '';
   if (v.startsWith('monthly')) placeholder = '如 ' + currentMonth;
   else if (v.startsWith('quarter')) placeholder = '如 ' + currentQuarter;
@@ -553,9 +708,17 @@ function onCycleTypeChange() {
   document.getElementById('f_currentPeriod').placeholder = '留空=自动按今天算 (' + (v.startsWith('quarter') ? currentQuarter : v === 'year-start' ? yyyy : currentMonth) + ')';
 }
 
-async function submitTask() {
-  const name = document.getElementById('f_name').value.trim();
-  if (!name) return toast('请填写任务名', 'error');
+async function submitTask(btn) {
+  const nameInput = document.getElementById('f_name');
+  const name = nameInput.value.trim();
+  if (!name) {
+    nameInput.classList.add('error');
+    nameInput.focus();
+    toast('请填写任务名', 'error');
+    return;
+  }
+  nameInput.classList.remove('error');
+
   const cycleType = document.getElementById('f_cycleType').value;
   const cycleDescMap = {
     'monthly-10':'每月 10 号','monthly-15':'每月 15 号','monthly-20':'每月 20 号',
@@ -575,90 +738,129 @@ async function submitTask() {
     currentPeriod: document.getElementById('f_currentPeriod').value.trim(),
     description: document.getElementById('f_description').value.trim()
   };
-  try {
-    await apiCall('/api/tasks', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    closeAddModal();
-    toast('任务已添加', 'success');
-    await loadTasks();
-  } catch (e) {
-    toast('保存失败：' + e.message, 'error');
-  }
+  await withLoading(btn, async () => {
+    try {
+      await apiCall('/api/tasks', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      closeAddModal();
+      toast('任务已添加', 'success');
+      await loadTasks();
+    } catch (e) {
+      toast('保存失败：' + e.message, 'error');
+    }
+  });
 }
 
 function openDoneModal(id) {
   pendingDoneId = id;
   document.getElementById('f_doneNote').value = '';
+  document.getElementById('f_doneNote').classList.remove('error');
   const t = allTasks.tasks.find(x => x.id === id);
   document.getElementById('doneTaskName').textContent = '任务：' + (t ? t.name : id) + '（周期：' + (t ? t.currentPeriod : '') + '）';
   document.getElementById('doneModal').classList.add('show');
-  setTimeout(() => document.getElementById('f_doneNote').focus(), 50);
+  setTimeout(() => document.getElementById('f_doneNote').focus(), 200);
 }
 function closeDoneModal() { document.getElementById('doneModal').classList.remove('show'); pendingDoneId = null; }
 
-async function confirmDone() {
+async function confirmDone(btn) {
   if (!pendingDoneId) return;
   const note = document.getElementById('f_doneNote').value.trim();
-  try {
-    await apiCall('/api/tasks/' + pendingDoneId + '?action=complete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ note }) });
-    closeDoneModal();
-    toast('已标记完成，自动推进到下一周期', 'success');
-    await loadTasks();
-  } catch (e) {
-    toast('操作失败：' + e.message, 'error');
-  }
-}
-
-async function skipTask(id) {
-  if (!confirm('确认跳过本周期？（不影响下一周期提醒）')) return;
-  try {
-    await apiCall('/api/tasks/' + id + '?action=skip', { method: 'POST' });
-    toast('已跳过', 'success');
-    await loadTasks();
-  } catch (e) { toast('操作失败：' + e.message, 'error'); }
-}
-
-async function resumeTask(id) {
-  try {
-    await apiCall('/api/tasks/' + id + '?action=resume', { method: 'POST' });
-    toast('已恢复待办', 'success');
-    await loadTasks();
-  } catch (e) { toast('操作失败：' + e.message, 'error'); }
-}
-
-async function deleteTask(id) {
-  if (!confirm('确认删除此任务？历史记录也会一起删除，无法恢复。')) return;
-  try {
-    await apiCall('/api/tasks/' + id + '?action=delete', { method: 'POST' });
-    toast('已删除', 'success');
-    await loadTasks();
-  } catch (e) { toast('操作失败：' + e.message, 'error'); }
-}
-
-async function manualScan() {
-  try {
-    const r = await apiCall('/api/scan');
-    if (r.urgent.length === 0) {
-      toast('扫描完成，今日无到期或过期任务', 'success');
-    } else {
-      const names = r.urgent.map(t => `${t.id} ${t.name}`).join('\n');
-      toast('今日到期/过期未做 ' + r.urgent.length + ' 条', 'success');
-      setTimeout(() => alert('今日到期/过期未做 ' + r.urgent.length + ' 条：\n\n' + names + '\n\n（这些会在 WorkBuddy 对话每日 9:00 自动提醒）'), 100);
+  const doneId = pendingDoneId;
+  await withLoading(btn, async () => {
+    try {
+      await apiCall('/api/tasks/' + doneId + '?action=complete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ note }) });
+      closeDoneModal();
+      justCompletedId = doneId; // 触发完成动画
+      toast('已标记完成，自动推进到下一周期', 'success');
+      await loadTasks();
+    } catch (e) {
+      toast('操作失败：' + e.message, 'error');
     }
-  } catch (e) { toast('扫描失败：' + e.message, 'error'); }
+  });
+}
+
+async function skipTask(id, btn) {
+  const confirmed = await customConfirm('确认跳过本周期？（不影响下一周期提醒）');
+  if (!confirmed) return;
+  await withLoading(btn, async () => {
+    try {
+      await apiCall('/api/tasks/' + id + '?action=skip', { method: 'POST' });
+      toast('已跳过', 'success');
+      await loadTasks();
+    } catch (e) { toast('操作失败：' + e.message, 'error'); }
+  });
+}
+
+async function resumeTask(id, btn) {
+  await withLoading(btn, async () => {
+    try {
+      await apiCall('/api/tasks/' + id + '?action=resume', { method: 'POST' });
+      toast('已恢复待办', 'success');
+      await loadTasks();
+    } catch (e) { toast('操作失败：' + e.message, 'error'); }
+  });
+}
+
+async function deleteTask(id, btn) {
+  const confirmed = await customConfirm('确认删除此任务？历史记录也会一起删除，无法恢复。');
+  if (!confirmed) return;
+  await withLoading(btn, async () => {
+    try {
+      await apiCall('/api/tasks/' + id + '?action=delete', { method: 'POST' });
+      toast('已删除', 'success');
+      await loadTasks();
+    } catch (e) { toast('操作失败：' + e.message, 'error'); }
+  });
+}
+
+async function manualScan(btn) {
+  await withLoading(btn, async () => {
+    try {
+      const r = await apiCall('/api/scan');
+      if (r.urgent.length === 0) {
+        toast('扫描完成，今日无到期或过期任务', 'success');
+      } else {
+        const names = r.urgent.map(t => `${t.id} ${t.name}`).join('\n');
+        toast(`今日到期/过期未做 ${r.urgent.length} 条`, 'success');
+        setTimeout(() => {
+          const confirmed = customConfirm(`今日到期/过期未做 ${r.urgent.length} 条：\n\n${names}\n\n（这些会在 WorkBuddy 对话每日 9:00 自动提醒）`);
+        }, 200);
+      }
+    } catch (e) { toast('扫描失败：' + e.message, 'error'); }
+  });
 }
 
 function toast(msg, type = '') {
   const el = document.getElementById('toast');
-  el.className = 'toast show ' + type;
+  el.className = 'toast ' + type;
   el.textContent = msg;
-  setTimeout(() => el.classList.remove('show'), 2500);
+  // 触发重排后加 show 类，让 transition 生效
+  void el.offsetWidth;
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-// 键盘 ESC 关闭 modal
+// 键盘事件：ESC 关闭所有 modal，Enter 在新增任务时保存
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    document.getElementById('addModal').classList.remove('show');
-    document.getElementById('doneModal').classList.remove('show');
+    if (document.getElementById('addModal').classList.contains('show')) closeAddModal();
+    if (document.getElementById('doneModal').classList.contains('show')) closeDoneModal();
+    if (document.getElementById('confirmModal').classList.contains('show')) closeConfirmModal(false);
+  }
+  // Enter 在新增任务 modal 里触发保存（textarea 里 Enter 换行不触发）
+  if (e.key === 'Enter' && document.getElementById('addModal').classList.contains('show') && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    document.getElementById('btnSubmitTask').click();
+  }
+  // Enter 在完成备注 modal 里触发确认
+  if (e.key === 'Enter' && document.getElementById('doneModal').classList.contains('show') && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    document.getElementById('btnConfirmDone').click();
+  }
+  // Enter 在 confirm modal 里触发确认
+  if (e.key === 'Enter' && document.getElementById('confirmModal').classList.contains('show')) {
+    e.preventDefault();
+    closeConfirmModal(true);
   }
 });
 
