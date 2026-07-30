@@ -528,6 +528,16 @@
   </div>
 </div>
 
+<!-- 任务详情 Modal -->
+<div class="modal-mask" id="detailModal" onclick="if(event.target===this) closeDetailModal()">
+  <div class="modal" style="max-width:640px">
+    <div id="detailContent"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeDetailModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -763,6 +773,52 @@ function closeConfirmModal(confirmed) {
     confirmResolve = null;
   }
 }
+
+// 任务详情查看
+function viewTask(id) {
+  const t = (allTasks.tasks || []).find(x => x.id === id);
+  if (!t) return toast('任务不存在', 'error');
+
+  const histItems = (t.history || []).length ? (t.history || []).map(h => {
+    const cls = h.completedAt ? 'done' : 'missed';
+    const label = h.completedAt ? `${h.period} ✓ ${h.completedAt}` : `${h.period} 未完成`;
+    const noteStr = h.note ? ` · ${escapeHtml(h.note)}` : '';
+    return `<span class="h-item ${cls}">${label}${noteStr}</span>`;
+  }).join('') : '<span style="color:var(--text-tertiary);font-size:12px">暂无历史记录</span>';
+
+  const doneCount = (t.history || []).filter(h => h.completedAt).length;
+  const missedCount = (t.history || []).filter(h => !h.completedAt).length;
+
+  document.getElementById('detailContent').innerHTML = `
+    <h2 style="margin-bottom:6px">${escapeHtml(t.name)} <span class="task-id">${t.id}</span></h2>
+    <div class="tags" style="margin-bottom:18px">
+      ${catTag(t.category)}
+      <span class="tag cycle">${escapeHtml(t.cycleDesc || '')}</span>
+      ${statusTag(t.status)}
+    </div>
+
+    ${t.description ? `<div style="background:#fafafa;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--text-secondary);line-height:1.6">${escapeHtml(t.description)}</div>` : ''}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:18px;font-size:13px">
+      <div><div style="color:var(--text-tertiary);font-size:11px;margin-bottom:2px">相关方</div><b>${escapeHtml(t.relatedParty || '—')}</b></div>
+      <div><div style="color:var(--text-tertiary);font-size:11px;margin-bottom:2px">当前周期</div><b>${escapeHtml(t.currentPeriod || '—')}</b></div>
+      <div><div style="color:var(--text-tertiary);font-size:11px;margin-bottom:2px">起始</div><b>${escapeHtml(t.startDate || '—')}</b></div>
+      <div><div style="color:var(--text-tertiary);font-size:11px;margin-bottom:2px">结束</div><b>${escapeHtml(t.endDate || '长期')}</b></div>
+      <div style="grid-column:span 2"><div style="color:var(--text-tertiary);font-size:11px;margin-bottom:2px">提醒规则</div><b>${escapeHtml(t.reminderRuleDesc || '—')}</b></div>
+      ${t.createdAt ? `<div style="grid-column:span 2"><div style="color:var(--text-tertiary);font-size:11px;margin-bottom:2px">创建时间</div><b>${escapeHtml(t.createdAt)}</b></div>` : ''}
+    </div>
+
+    <div style="border-top:1px dashed var(--border);padding-top:14px;margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="font-size:13px">完成历史</b>
+        <span style="font-size:11px;color:var(--text-tertiary)">已完成 ${doneCount} · 未完成 ${missedCount}</span>
+      </div>
+      <div>${histItems}</div>
+    </div>
+  `;
+  document.getElementById('detailModal').classList.add('show');
+}
+function closeDetailModal() { document.getElementById('detailModal').classList.remove('show'); }
 
 function openAddModal() {
   ['f_name','f_relatedParty','f_startDate','f_endDate','f_currentPeriod','f_description'].forEach(id => {
