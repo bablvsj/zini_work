@@ -1,10 +1,10 @@
 {
-  "framework": null,
-  "outputDirectory": "public",
-  "functions": {
-    "api/**/*.js": {
-      "memory": 128,
-      "maxDuration": 10
-    }
-  }
+  "version": 2,
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
+  "rewrites": [
+    { "source": "/((?!api).*)", "destination": "/$1" }
+  ]
 }
