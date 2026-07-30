@@ -1,5 +1,10 @@
 {
-  "rewrites": [
-    { "source": "/((?!api).*)", "destination": "/public/$1" }
-  ]
+  "framework": null,
+  "outputDirectory": "public",
+  "functions": {
+    "api/**/*.js": {
+      "memory": 128,
+      "maxDuration": 10
+    }
+  }
 }
